@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Thread — May 11, 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f2ed;
+    --paper-deep: #ede9e2;
+    --accent: #c4692a;
+    --accent-muted: #d4895a;
+    --rule: rgba(15,14,12,0.12);
+    --muted: rgba(15,14,12,0.45);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 60px 40px 120px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 24px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .brand {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .issue-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .title-block {
+    margin-bottom: 56px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  h1 {
+    font-size: clamp(48px, 7vw, 68px);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .date-line {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 16px;
+  }
+
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: var(--accent);
+    margin: 32px 0;
+    opacity: 0.6;
+  }
+
+  /* Synthesis output */
+  .synthesis {
+    font-size: 17px;
+    line-height: 1.85;
+    color: var(--ink);
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .synthesis h3 {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 40px 0 14px;
+    font-weight: 400;
+  }
+
+  .synthesis h3:first-child { margin-top: 0; }
+
+  .synthesis p {
+    margin-bottom: 18px;
+    color: var(--ink);
+  }
+
+  .sharpening {
+    background: var(--paper-deep);
+    border-left: 3px solid var(--accent);
+    padding: 22px 26px;
+    margin: 8px 0 24px;
+    font-size: 20px;
+    font-style: italic;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+
+  .one-move {
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--ink);
+    padding: 18px 22px;
+    margin: 8px 0 24px;
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .footer-brand {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .footer-note {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 580px) {
+    .page { padding: 40px 24px 80px; }
+    .footer { flex-direction: column; gap: 12px; align-items: flex-start; }
+  }
+
+  @media print {
+    body { background: #fff; }
+    body::before { display: none; }
+    .footer { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="masthead">
+    <span class="brand">The Thread by PSDR</span>
+    <span class="issue-label">Week of May 11, 2026</span>
+  </div>
+
+  <div class="title-block">
+    <h1>The<br><em>Thread</em></h1>
+    <div class="date-line">May 11, 2026</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="synthesis">
+
+    <h3>What's Actually Happening</h3>
+    <p>Your body is thriving right now — five runs, dialed nutrition, real execution — and yet the week still feels heavy. The weight isn't physical. It's the gap between the domains where you're performing (body, work baseline) and the ones gone quiet (ventures, capital), combined with a moment at home that cost you something. You're executing the basics well, but the deeper architecture of your life needs more than basics right now.</p>
+
+    <h3>Cross-Domain Signals</h3>
+    <p>The fight with Sam and the venture silence are connected. When you're not building toward something that feels like yours, frustration accumulates with nowhere to go — and it surfaces sideways, usually toward the people closest to you. The eruption isn't random; it tends to follow emptiness in the creative and purpose domains.</p>
+    <p>Work's "going with the flow, no validation needed" posture is adaptive, but watch it. That equanimity can quietly bleed into a broader drift — applied to ventures, to investing, to the life you're building — where going with the flow becomes the default because it's easier than forcing clarity.</p>
+    <p>The LDL anxiety is eating more bandwidth than the actual cholesterol numbers warrant. You know what to do and you're doing it, but the mental loop keeps running. That loop is borrowing energy from everything else.</p>
+
+    <h3>Where You're Drifting or Compounding</h3>
+    <p>Compounding: physical base. You're building something real for July 6. Drifting: PACE and the pet aftercare venture have gone two weeks without a single output. At this stage, presence is the brand. Silence has a cost that compounds too.</p>
+
+    <h3>The Sharpening Question</h3>
+    <div class="sharpening">When you erupted at Sam — what were you actually trying to say that you didn't have language for yet?</div>
+
+    <h3>One Move</h3>
+    <div class="one-move">Before next weekend, produce one small PACE artifact — a single post, a paragraph, anything — not for the audience, but to break the silence and prove to yourself the creative engine still runs.</div>
+
+  </div>
+
+  <div class="footer">
+    <span class="footer-brand">The Thread by PSDR</span>
+    <span class="footer-note">A weekly practice of honest synthesis.</span>
+  </div>
+
+</div>
+</body>
+</html>
