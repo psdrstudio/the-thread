@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Thread by PSDR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f2ed;
+    --paper-deep: #ede9e2;
+    --accent: #c4692a;
+    --accent-muted: #d4895a;
+    --rule: rgba(15,14,12,0.12);
+    --muted: rgba(15,14,12,0.45);
+    --surface: rgba(255,255,255,0.6);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Subtle paper texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 60px 40px 120px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 24px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .brand {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .edition {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  h1 {
+    font-size: clamp(48px, 7vw, 72px);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 8px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .tagline {
+    font-size: 16px;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 56px;
+    animation: fadeUp 0.6s 0.15s ease both;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 12px 20px;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .tab:hover { color: var(--ink); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* Panels */
+  .panel { display: none; animation: fadeUp 0.4s ease both; }
+  .panel.active { display: block; }
+
+  /* Input sections */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .domain-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 580px) {
+    .domain-grid { grid-template-columns: 1fr; }
+    .page { padding: 40px 24px 80px; }
+  }
+
+  .domain-block {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 16px;
+    transition: border-color 0.2s;
+  }
+
+  .domain-block:focus-within {
+    border-color: var(--accent-muted);
+  }
+
+  .domain-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .domain-icon { font-size: 12px; }
+
+  textarea, input[type="text"] {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: var(--ink);
+    resize: none;
+    line-height: 1.6;
+  }
+
+  textarea::placeholder, input::placeholder {
+    color: rgba(15,14,12,0.3);
+    font-style: italic;
+  }
+
+  .full-width {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 16px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .full-width:focus-within { border-color: var(--accent-muted); }
+
+  /* Tone selector */
+  .tone-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .tone-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid var(--rule);
+    border-radius: 20px;
+    cursor: pointer;
+    color: var(--muted);
+    background: none;
+    transition: all 0.2s;
+  }
+
+  .tone-chip:hover { border-color: var(--accent-muted); color: var(--ink); }
+  .tone-chip.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  /* Run button */
+  .run-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 16px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 1px;
+  }
+
+  .run-btn:hover { background: var(--accent); }
+  .run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .run-btn .arrow {
+    font-size: 16px;
+    transition: transform 0.2s;
+  }
+
+  .run-btn:hover .arrow { transform: translateX(4px); }
+
+  /* Spinner */
+  .spinner {
+    width: 14px; height: 14px;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  /* Output */
+  .output-area {
+    display: none;
+    margin-top: 48px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .output-area.visible { display: block; }
+
+  .output-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .output-title {
+    font-size: 28px;
+    font-weight: 300;
+    font-style: italic;
+  }
+
+  .output-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .output-body {
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--ink);
+  }
+
+  .output-body h3 {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 32px 0 12px;
+    font-weight: 400;
+  }
+
+  .output-body p { margin-bottom: 16px; }
+
+  .output-body strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .output-body em { color: var(--accent); font-style: italic; }
+
+  .output-body ul {
+    padding-left: 20px;
+    margin-bottom: 16px;
+  }
+
+  .output-body ul li {
+    margin-bottom: 8px;
+    line-height: 1.7;
+  }
+
+  .sharpening-question {
+    background: var(--paper-deep);
+    border-left: 3px solid var(--accent);
+    padding: 20px 24px;
+    margin: 32px 0;
+    font-size: 19px;
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  /* Archive tab */
+  .archive-empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 18px;
+  }
+
+  .archive-entry {
+    border-bottom: 1px solid var(--rule);
+    padding: 20px 0;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .archive-entry:hover { padding-left: 8px; }
+
+  .archive-entry-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+
+  .archive-entry-preview {
+    font-size: 16px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  /* Seed tab */
+  .seed-display {
+    font-size: 15px;
+    line-height: 1.8;
+  }
+
+  .seed-section {
+    margin-bottom: 32px;
+  }
+
+  .seed-section h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .seed-section p, .seed-section li {
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .seed-section ul { padding-left: 18px; }
+
+  /* Loading states */
+  .loading-line {
+    height: 16px;
+    background: linear-gradient(90deg, var(--paper-deep) 25%, var(--paper) 50%, var(--paper-deep) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 2px;
+    margin-bottom: 12px;
+  }
+
+  .loading-line.short { width: 40%; }
+  .loading-line.medium { width: 70%; }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Error */
+  .error-msg {
+    background: #fdf2ee;
+    border: 1px solid #e8b89a;
+    border-radius: 2px;
+    padding: 16px 20px;
+    font-size: 14px;
+    color: #8b3a1a;
+    margin-top: 20px;
+    display: none;
+  }
+
+  .copy-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: none;
+    border: 1px solid var(--rule);
+    padding: 6px 12px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s;
+    border-radius: 1px;
+  }
+
+  .copy-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+  .api-key-block { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--rule); }
+  .api-key-block h4 { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .api-key-block p { font-size: 13px; color: var(--muted); font-style: italic; margin-bottom: 14px; line-height: 1.6; }
+  .api-key-row { display: flex; gap: 10px; align-items: center; }
+  .api-key-input { flex: 1; font-family: 'DM Mono', monospace; font-size: 12px; background: rgba(255,255,255,0.6); border: 1px solid var(--rule); border-radius: 2px; padding: 10px 14px; color: var(--ink); outline: none; transition: border-color 0.2s; }
+  .api-key-input:focus { border-color: var(--accent-muted); }
+  .api-key-save { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; background: var(--ink); color: var(--paper); border: none; padding: 10px 18px; cursor: pointer; border-radius: 1px; transition: background 0.2s; white-space: nowrap; }
+  .api-key-save:hover { background: var(--accent); }
+  .api-key-status { font-family: 'DM Mono', monospace; font-size: 10px; margin-top: 8px; color: var(--muted); }
+  .api-key-status.set { color: #5a8a5a; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="masthead">
+    <span class="brand">The Thread by PSDR</span>
+    <span class="edition" id="currentDate"></span>
+  </div>
+
+  <h1>The<br><em>Thread</em></h1>
+  <p class="tagline">A weekly practice designed by PSDR</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('input')">This Week</button>
+    <button class="tab" onclick="switchTab('archive')">Archive</button>
+    <button class="tab" onclick="switchTab('seed')">Life Architecture</button>
+  </div>
+
+  <!-- INPUT PANEL -->
+  <div class="panel active" id="panel-input">
+
+    <div class="section-label">Weekly Signal</div>
+    <p style="font-size:15px; color:var(--muted); font-style:italic; margin-bottom:24px; line-height:1.7;">
+      Be brief and honest. Not a report — raw signal. What happened, what you felt, what's stuck.
+    </p>
+
+    <div class="domain-grid">
+      <div class="domain-block">
+        <div class="domain-name"><span class="domain-icon">🏃</span> Body & Training</div>
+        <textarea id="d-body" rows="4" placeholder="Training load, how the body felt, race prep, energy levels..."></textarea>
+      </div>
+      <div class="domain-block">
+        <div class="domain-name"><span class="domain-icon">💼</span> Work & Career</div>
+        <textarea id="d-work" rows="4" placeholder="TerraPay progress, deals, team dynamics, strategic moves..."></textarea>
+      </div>
+      <div class="domain-block">
+        <div class="domain-name"><span class="domain-icon">🔥</span> Ventures & Brand</div>
+        <textarea id="d-ventures" rows="4" placeholder="PACE progress, pet aftercare, coffee, any builds or creative work..."></textarea>
+      </div>
+      <div class="domain-block">
+        <div class="domain-name"><span class="domain-icon">💰</span> Capital & Investing</div>
+        <textarea id="d-capital" rows="4" placeholder="Portfolio moves, financial decisions, wealth architecture..."></textarea>
+      </div>
+      <div class="domain-block">
+        <div class="domain-name"><span class="domain-icon">🤝</span> Relationships</div>
+        <textarea id="d-relationships" rows="4" placeholder="Samantha, family, friendships, team, energy exchanges..."></textarea>
+      </div>
+      <div class="domain-block">
+        <div class="domain-name"><span class="domain-icon">🧠</span> Inner Life</div>
+        <textarea id="d-inner" rows="4" placeholder="Mindset, emotional weather, what's draining you, what's alive..."></textarea>
+      </div>
+    </div>
+
+    <div class="full-width">
+      <div class="domain-name" style="margin-bottom:8px;">🎯 This week's dominant question or tension</div>
+      <input type="text" id="d-tension" placeholder="The thing sitting heaviest — a decision, a doubt, a possibility...">
+    </div>
+
+    <div class="section-label" style="margin-bottom: 14px;">Synthesis Tone</div>
+    <div class="tone-row">
+      <button class="tone-chip selected" data-tone="direct">Direct & Sharp</button>
+      <button class="tone-chip" data-tone="reflective">Reflective</button>
+      <button class="tone-chip" data-tone="strategic">Strategic</button>
+      <button class="tone-chip" data-tone="challenging">Challenge Me</button>
+    </div>
+
+    <button class="run-btn" id="runBtn" onclick="runSynthesis()">
+      <span class="spinner" id="spinner"></span>
+      <span id="btnText">Run Synthesis</span>
+      <span class="arrow">→</span>
+    </button>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- Output -->
+    <div class="output-area" id="outputArea">
+      <div class="output-header">
+        <span class="output-title">The Thread</span>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <span class="output-date" id="outputDate"></span>
+          <button class="copy-btn" onclick="copyOutput()">Copy</button>
+        </div>
+      </div>
+      <div class="output-body" id="outputBody"></div>
+    </div>
+
+  </div>
+
+  <!-- ARCHIVE PANEL -->
+  <div class="panel" id="panel-archive">
+    <div class="section-label">Past Syntheses</div>
+    <div id="archiveList"></div>
+  </div>
+
+  <!-- SEED PANEL -->
+  <div class="panel" id="panel-seed">
+    <div class="section-label">Your Life Architecture</div>
+    <p style="font-size:15px; color:var(--muted); font-style:italic; margin-bottom:28px; line-height:1.7;">
+      The fixed context Claude loads every synthesis. Edit this as your life evolves.
+    </p>
+    <div class="seed-display" id="seedDisplay"></div>
+  </div>
+
+</div>
+
+<script>
+// =====================
+// SEED: Paolo's Life Architecture
+// =====================
+const SEED = {
+  identity: {
+    name: "Paolo Real",
+    tagline: "Director of Network Strategic Initiatives, TerraPay. Endurance runner. Brand builder. Intentional operator.",
+    location: "BGC, Taguig City, Philippines",
+    anchors: ["Samantha (recently married)", "Running as identity and discipline", "Building things that compound"]
+  },
+  principles: [
+    "Escape competition through authenticity",
+    "Play long-term games with long-term people",
+    "Intentional living over reactive living",
+    "Build for compounding, not for now"
+  ],
+  fiveYearThesis: `In 5 years: Leading a significant role in cross-border payments infrastructure or building my own venture in the space. PACE by PSDR is a recognized running brand with product-market fit. Multiple income streams are operational. Living between Manila and a second base (UAE or Portugal track active). Physical peak maintained through structured endurance training. Samantha and I have built a life that is genuinely ours.`,
+  domains: {
+    body: "Marathon training (Gold Coast July 6, sub-4hr target). Garmin Fenix 8 training data. Max HR 193. Right shoulder tendinosis managed. Cholesterol under active reduction.",
+    work: "TerraPay Director level. 10+ years BD/Sales/Partnerships in global payments. Regional team management. Network expansion and strategic initiatives focus.",
+    ventures: "PACE by PSDR — running brand (Substack, social, product system in development). Pet aftercare B2B operations (aquamation/cremation white-label ops, Pets in Peace anchor client). Grouphug Coffee (background build).",
+    capital: "PH equity portfolio (AREIT, MBT, ICT, ALI, AC, AP, CNPF, DMC, SCC, ACEN). Dividend-first strategy. ₱20k/month contributions. Target ₱120k/year passive income. Pag-IBIG MP2 active. Global residency track (UAE + Portugal).",
+    relationships: "Samantha — newly married, partner in building the life. Honeymoon (Sydney + Whitsundays, July). Japan trip July week 3. Collaborative by nature, servant leader mentality.",
+    inner: "Identity built around endurance, authenticity, and compounding effort. Journaling practice oriented toward emotional expression. Has expressed wellbeing concerns historically — self-awareness is high."
+  },
+  currentBets: [
+    "Gold Coast Marathon sub-4hr (July 6)",
+    "PACE by PSDR product launch",
+    "Pet aftercare co-founder search",
+    "TerraPay network expansion targets",
+    "Portfolio reaching ₱120k annual dividend threshold"
+  ]
+};
+
+// =====================
+// INIT
+// =====================
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('currentDate').textContent = formatDate(new Date());
+  renderSeed();
+  renderArchive();
+  updateApiKeyStatus();
+
+  // Tone chips
+  document.querySelectorAll('.tone-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.tone-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+    });
+  });
+});
+
+// =====================
+// TAB SWITCHING
+// =====================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const panels = ['input', 'archive', 'seed'];
+    t.classList.toggle('active', panels[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'archive') renderArchive();
+}
+
+// =====================
+// SYNTHESIS
+// =====================
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) return;
+  localStorage.setItem('claude-api-key', key);
+  document.getElementById('apiKeyInput').value = '';
+  updateApiKeyStatus();
+}
+
+function updateApiKeyStatus() {
+  const el = document.getElementById('apiKeyStatus');
+  if (!el) return;
+  const key = localStorage.getItem('claude-api-key');
+  if (key) { el.textContent = '✓ Key saved — ends in ' + key.slice(-4); el.className = 'api-key-status set'; }
+  else { el.textContent = 'No key saved yet.'; el.className = 'api-key-status'; }
+}
+
+async function runSynthesis() {
+  const inputs = {
+    body: document.getElementById('d-body').value.trim(),
+    work: document.getElementById('d-work').value.trim(),
+    ventures: document.getElementById('d-ventures').value.trim(),
+    capital: document.getElementById('d-capital').value.trim(),
+    relationships: document.getElementById('d-relationships').value.trim(),
+    inner: document.getElementById('d-inner').value.trim(),
+    tension: document.getElementById('d-tension').value.trim()
+  };
+
+  const filledDomains = Object.values(inputs).filter(v => v.length > 0);
+  if (filledDomains.length < 2) {
+    showError("Add signal to at least 2 domains before running synthesis.");
+    return;
+  }
+
+  const tone = document.querySelector('.tone-chip.selected')?.dataset.tone || 'direct';
+  const toneInstructions = {
+    direct: "Be direct and sharp. Name what you see clearly. No softening.",
+    reflective: "Be reflective and contemplative. Help Paolo see beneath the surface.",
+    strategic: "Be strategic. Focus on leverage points, decisions, and positioning.",
+    challenging: "Challenge Paolo's assumptions. Name blind spots. Ask hard questions."
+  };
+
+  const apiKey = localStorage.getItem('claude-api-key');
+  if (!apiKey) {
+    showError("No API key found. Go to Life Architecture tab → paste your Claude API key and save it.");
+    return;
+  }
+
+  setLoading(true);
+  document.getElementById('errorMsg').style.display = 'none';
+
+  const weekInput = buildWeekInput(inputs);
+  const systemPrompt = buildSystemPrompt(toneInstructions[tone]);
+  const userPrompt = buildUserPrompt(weekInput);
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error?.message || 'API error');
+    }
+
+    const raw = data.content?.find(b => b.type === 'text')?.text || '';
+    const today = new Date();
+
+    renderOutput(raw, today);
+    saveToArchive({ date: today.toISOString(), inputs, tone, output: raw });
+    setLoading(false);
+
+  } catch (err) {
+    setLoading(false);
+    showError("Synthesis failed: " + err.message + ". Check your Claude API connection.");
+  }
+}
+
+function buildSystemPrompt(toneInstruction) {
+  return `You are Paolo's integrated life synthesis engine. You hold his full life architecture and reason across all domains simultaneously.
+
+PAOLO'S LIFE ARCHITECTURE:
+Core principles: ${SEED.principles.join(' | ')}
+5-year thesis: ${SEED.fiveYearThesis}
+Current bets: ${SEED.currentBets.join(', ')}
+Domain context:
+- Body: ${SEED.domains.body}
+- Work: ${SEED.domains.work}  
+- Ventures: ${SEED.domains.ventures}
+- Capital: ${SEED.domains.capital}
+- Relationships: ${SEED.domains.relationships}
+- Inner: ${SEED.domains.inner}
+
+YOUR SYNTHESIS TASK:
+Read the week's signal across all domains. Then produce a synthesis with these exact sections using ### headers:
+
+### What's Actually Happening
+2-3 sentences naming the true state of the week — not a summary of events, but what's really going on beneath the surface.
+
+### Cross-Domain Signals
+2-3 specific observations about how different domains are affecting each other. Look for hidden connections, friction, or amplification between domains.
+
+### Where You're Drifting or Compounding
+One clear call — where is Paolo moving toward his long-game thesis, and where is he drifting from it? Be specific.
+
+### The Sharpening Question
+ONE question — the most important question Paolo could sit with this week. Not a to-do. Not advice. A question that creates clarity or productive tension. Make it specific to his actual week, not generic.
+
+### One Move
+If there's one high-leverage action — and only if it's genuinely clear — name it. One sentence. If nothing is obvious, say so.
+
+TONE INSTRUCTION: ${toneInstruction}
+
+FORMAT: Use the ### headers. Write in second person (you/your). Be specific to Paolo's actual inputs — no generic life coaching language. Short, dense, high-signal. Total response under 400 words.`;
+}
+
+function buildUserPrompt(weekInput) {
+  return `Here is my signal from this week:\n\n${weekInput}\n\nSynthesize.`;
+}
+
+function buildWeekInput(inputs) {
+  const labels = {
+    body: 'Body & Training', work: 'Work & Career', ventures: 'Ventures & Brand',
+    capital: 'Capital & Investing', relationships: 'Relationships', inner: 'Inner Life', tension: 'Dominant Tension'
+  };
+  return Object.entries(inputs)
+    .filter(([, v]) => v.length > 0)
+    .map(([k, v]) => `${labels[k]}:\n${v}`)
+    .join('\n\n');
+}
+
+// =====================
+// RENDER OUTPUT
+// =====================
+function renderOutput(raw, date) {
+  const outputArea = document.getElementById('outputArea');
+  const outputBody = document.getElementById('outputBody');
+  const outputDate = document.getElementById('outputDate');
+
+  outputDate.textContent = formatDate(date);
+
+  // Parse markdown-style sections into HTML
+  let html = raw
+    .replace(/### (.+)/g, '<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .split('\n\n')
+    .map(para => {
+      if (para.startsWith('<h3>')) return para;
+      if (para.trim().startsWith('-')) {
+        const items = para.trim().split('\n').map(l => `<li>${l.replace(/^-\s*/, '')}</li>`).join('');
+        return `<ul>${items}</ul>`;
+      }
+      if (para.includes('Sharpening Question') || para.toLowerCase().includes('?')) {
+        // Wrap question paragraphs specially — detect if it's the question block
+      }
+      return para.trim() ? `<p>${para.trim()}</p>` : '';
+    })
+    .join('');
+
+  // Wrap the sharpening question section content in special styling
+  html = html.replace(
+    /(<h3>The Sharpening Question<\/h3>)([\s\S]*?)(?=<h3>|$)/,
+    (match, header, content) => `${header}<div class="sharpening-question">${content.replace(/<\/?p>/g, '').trim()}</div>`
+  );
+
+  outputBody.innerHTML = html;
+  outputArea.classList.add('visible');
+  outputArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// =====================
+// ARCHIVE
+// =====================
+function saveToArchive(entry) {
+  try {
+    const archive = JSON.parse(localStorage.getItem('synthesis-archive') || '[]');
+    archive.unshift(entry);
+    localStorage.setItem('synthesis-archive', JSON.stringify(archive.slice(0, 52))); // keep 1 year
+  } catch(e) {}
+}
+
+function renderArchive() {
+  const list = document.getElementById('archiveList');
+  try {
+    const archive = JSON.parse(localStorage.getItem('synthesis-archive') || '[]');
+    if (archive.length === 0) {
+      list.innerHTML = '<div class="archive-empty">Your synthesis history will appear here.<br>Run your first synthesis to begin.</div>';
+      return;
+    }
+    list.innerHTML = archive.map((entry, i) => `
+      <div class="archive-entry" onclick="expandArchive(${i})">
+        <div class="archive-entry-date">${formatDate(new Date(entry.date))} · ${entry.tone || 'direct'}</div>
+        <div class="archive-entry-preview">${getPreview(entry.output)}</div>
+      </div>
+    `).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="archive-empty">Archive unavailable.</div>';
+  }
+}
+
+function expandArchive(i) {
+  try {
+    const archive = JSON.parse(localStorage.getItem('synthesis-archive') || '[]');
+    const entry = archive[i];
+    if (!entry) return;
+    switchTab('input');
+    renderOutput(entry.output, new Date(entry.date));
+  } catch(e) {}
+}
+
+function getPreview(text) {
+  const clean = text.replace(/###.+/g, '').replace(/\*\*/g, '').replace(/\*/g, '').trim();
+  return clean.slice(0, 120) + (clean.length > 120 ? '…' : '');
+}
+
+// =====================
+// SEED DISPLAY
+// =====================
+function renderSeed() {
+  const el = document.getElementById('seedDisplay');
+  el.innerHTML = `
+    <div class="seed-section">
+      <h4>Core Principles</h4>
+      <ul>${SEED.principles.map(p => `<li>${p}</li>`).join('')}</ul>
+    </div>
+    <div class="seed-section">
+      <h4>Five-Year Thesis</h4>
+      <p>${SEED.fiveYearThesis}</p>
+    </div>
+    <div class="seed-section">
+      <h4>Current Active Bets</h4>
+      <ul>${SEED.currentBets.map(b => `<li>${b}</li>`).join('')}</ul>
+    </div>
+    <div class="seed-section">
+      <h4>Domain Contexts</h4>
+      ${Object.entries(SEED.domains).map(([k,v]) => `<p><strong>${k.charAt(0).toUpperCase()+k.slice(1)}:</strong> ${v}</p>`).join('')}
+    </div>
+    <div class="api-key-block">
+      <h4>Claude API Key</h4>
+      <p>Required to run synthesis. Saved only to this browser — never sent anywhere except Anthropic's API.</p>
+      <div class="api-key-row">
+        <input class="api-key-input" type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+        <button class="api-key-save" onclick="saveApiKey()">Save Key</button>
+      </div>
+      <div class="api-key-status" id="apiKeyStatus"></div>
+    </div>
+  `;
+}
+
+// =====================
+// UTILS
+// =====================
+function setLoading(state) {
+  const btn = document.getElementById('runBtn');
+  const spinner = document.getElementById('spinner');
+  const btnText = document.getElementById('btnText');
+  btn.disabled = state;
+  spinner.style.display = state ? 'block' : 'none';
+  btnText.textContent = state ? 'Synthesizing...' : 'Run Synthesis';
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function copyOutput() {
+  const text = document.getElementById('outputBody').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+</script>
+</body>
+</html>
